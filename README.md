@@ -28,4 +28,4 @@ just for example.
 
 Note:
 If you want to run a Jenkins pipeline using the Jenkinsfile provided here make sure you have 
-the Timestamps plugin the the jenkins user is part of the docker group
+the Timestamps plugin and the jenkins user is part of the docker group
