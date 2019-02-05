@@ -1,0 +1,8 @@
+sqlalchemy
+pytest
+sqlalchemy_utils
+flask
+flask-cors
+lxml
+beautifulsoup4
+mysql-connector-python

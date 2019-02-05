@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+  <head>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  </head>
+  <body>
+    <style>
+    .error {
+      color:red;
+      font-weight: bold;
+      font-size: 20px;
+    }
+
+    .testtable {
+      width: 600px;
+      margin: 0 auto;
+    }
+
+    .hidden {
+      display:none;
+    }
+
+    .open {
+      color: green;
+    }
+
+    .closed {
+      color: red;
+    }
+
+    .host {
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .history {
+      text-align: center;
+    }
+
+    .myInput {
+      text-align: center;
+    }
+
+    </style>
+
+    </br>
+    </br>
+    </br>
+    </br>
+    </br>
+    </br>
+    <div class="myInput">
+      <input id="myInput" type="text" value="">
+      <input type ="button" id ="myButton" value="Scan" class="notloading">
+      <div class="error hidden" id="errorText"></div>
+      <br>
+      <img src="static/loading.gif" alt="" id="loadingGif" class="hidden">
+    </div>
+    <br>
+   
+  
+
+    <div id="tableDiv" class="hidden">
+      <h1 class="history">History</h1></br>
+      <table id="historyTable" class="table table-bordered testtable" >
+          <thead class="thead-dark">
+              <tr>
+                <th scope="col" class="myInput">Port</th>
+                <th scope="col" class="myInput">Status</th>
+                <th scope="col" class="myInput">Service</th>
+                <th scope="col" class="myInput">Timestamp</th>
+                <th scope="col" class="MyInput">Status Change</th>
+              </tr>
+            </thead>
+      </table>
+    </div>
+
+    <script>
+      $("#myButton").on("click", function() {
+        var host = $("#myInput").val()
+        var hostRegex = RegExp("^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$")
+        if (hostRegex.test(host)) {
+          $('#loadingGif').removeClass("hidden")
+          $('#tableDiv').addClass("hidden")
+          $('#errorText').addClass("hidden")
+          scan_hosts()
+        } else {
+          $("#errorText").html("Please provide a valid hostname/IP address");
+        }
+      })
+
+      function scan_hosts() {
+        var hosts_list = $("#myInput").val()
+        $.ajax({
+          url: 'http://replace_backend_address/scan',
+          type: 'POST',
+          dataType: 'json',
+          data: JSON.stringify({ hosts: hosts_list }),
+		  crossDomain: true,
+          headers: {
+            'Access-Control-Allow-Origin': '*',
+			'Access-Control-Allow-Headers': '*'
+          },
+          contentType: 'application/json; charset=utf-8',
+          success: function (result) {
+            $('#historyTable tbody').empty();
+            $("#tableDiv").removeClass("hidden")
+            parse_response(result)
+            $('#loadingGif').addClass("hidden")
+          },
+          statusCode: {
+            404: function(result) {
+              $("#errorText").html(result["responseText"]);
+              $('#errorText').removeClass("hidden")
+              $('#loadingGif').addClass("hidden")
+            },
+            400: function(result) {
+              $("#errorText").html(result["responseText"]);
+              // parse_response(result)
+              $('#errorText').removeClass("hidden")
+              $('#loadingGif').addClass("hidden")
+            }
+          }
+        })
+      }
+
+      function parse_response(result) {
+        selector ='#historyTable'
+        for (var host in result) {
+          $(selector).append($('<tr/>').append($('<td/>').html(host).addClass("host").attr('colspan', 5)));
+          if ("error" in result[host]) {
+              $(selector).append($('<tr/>').append($('<td/>').html(result[host]["error"]).addClass("error").attr('colspan', 5)));
+          } else {
+            for (i = 0; i < result[host]["data"].length; i++) {
+              port_info = result[host]["data"][i]
+              var row = $('<tr/>');
+              for (var info in port_info) {
+                var info_value = port_info[info]
+                if (info === "open") {
+                  var td = $('<td/>').html(info_value === true ? "open": "closed");
+                  if (info_value === true) {
+                    td.addClass('open');
+                  } else {
+                    td.addClass('closed');
+                  }
+                } else {
+                  var td = $('<td/>').html(info_value);
+                }
+                row.append(td);
+              }
+              $(selector).append(row);
+            }
+          }
+        }
+      }
+    </script>
+  </body>
+</html>

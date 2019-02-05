@@ -1,0 +1,16 @@
+FROM centos/python-36-centos7
+
+USER root
+RUN mkdir -p /opt/PortScanner
+
+COPY PortScanner /opt/PortScanner
+
+RUN pip install -r /opt/PortScanner/pip_requirements; yum install -y nmap;
+
+ENV PORT_SCANNER_CFG=/opt/PortScanner/portscanner.cfg
+
+WORKDIR /opt/PortScanner/backend
+EXPOSE 5000
+ENTRYPOINT ["python"]
+CMD ["__init__.py"]
+
