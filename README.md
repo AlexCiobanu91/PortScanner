@@ -14,7 +14,8 @@ The application has two main components:
 
 How does it work:
 After clicking the "scan" button inside the Web Page an ajax call is made to the /scan endpoint of the Backend server
-and the response is afterwards parsed using client-side javascript.
+and the response is afterwards parsed using client-side javascript. The backend server listens by default on port 5000 
+but you can map another port using the port option of the docker run command (docker run -p <port>:5000 <your_image>)
 
 To create an instance of this app you should run the run.sh script with the following parameters:
 	./run.sh <MySQLAddress> <MySqlDatabaseName> <MySQLUser> <MySQLPassword> <DeployMySql>
